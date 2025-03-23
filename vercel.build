@@ -1,0 +1,3 @@
+# 此文件确保Vercel知道如何构建Python应用
+# 安装requirements-vercel.txt中的依赖
+pip install -r requirements-vercel.txt 
