@@ -1,0 +1,27 @@
+{
+  "name": "startup-pitch-simulator",
+  "version": "1.0.0",
+  "description": "创业项目模拟答辩平台",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "创业",
+    "答辩",
+    "PPT",
+    "DeepSeek",
+    "AI"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "formidable": "^2.1.2",
+    "pdf-parse": "^1.1.1",
+    "pptx-extract": "^1.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+} 

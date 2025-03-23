@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创业路演模拟器</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        .loading-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+        }
+        .smooth-scroll {
+            scroll-behavior: smooth;
+        }
+        .gradient-button {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1, #96C93D);
+            background-size: 300% 300%;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: gradient 5s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .gradient-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .gradient-button:active {
+            transform: translateY(-1px);
+        }
+
+        .progress-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            margin: 0 40px;
+            padding-top: 30px;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            width: 40px;
+        }
+
+        .step-node {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .step-node i {
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .step-text {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            position: absolute;
+            width: 120px;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 45px;
+            left: 20px;
+            right: 20px;
+            height: 2px;
+            background: #f0f0f0;
+            z-index: 0;
+        }
+
+        .progress-line-active {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: #4CAF50;
+            transition: width 0.3s ease;
+            width: 0;
+        }
+
+        .step-node.active {
+            background: #4ECDC4;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .step-node.completed {
+            background: #4CAF50;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(78, 205, 196, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(78, 205, 196, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(78, 205, 196, 0);
+            }
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .score-container {
+            margin: 20px 0;
+        }
+
+        .score-bar {
+            height: 20px;
+            border-radius: 10px;
+            margin: 10px 0;
+            transition: width 1s ease;
+        }
+
+        .score-red { background-color: #FF6B6B; }
+        .score-yellow { background-color: #FFD93D; }
+        .score-blue { background-color: #45B7D1; }
+        .score-green { background-color: #96C93D; }
+
+        .feedback-section {
+            margin: 30px 0;
+        }
+
+        .feedback-section h3 {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .question-answer {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .question {
+            font-size: 1.1em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .answer {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            resize: vertical;
+        }
+
+        .answer:focus {
+            border-color: #4ECDC4;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(78,205,196,0.2);
+        }
+
+        .answer::placeholder {
+            color: #a0aec0;
+        }
+
+        .progress-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin: 30px 0;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active {
+            background: rgba(78,205,196,0.1);
+            color: #4ECDC4;
+            transform: translateX(10px);
+        }
+
+        .progress-step i {
+            font-size: 1.2em;
+            margin-right: 15px;
+        }
+
+        .feedback-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .feedback-section h3 {
+            color: #2c3e50;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .score-container {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+
+        .score-text {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-right: 20px;
+            min-width: 80px;
+        }
+
+        .score-bar {
+            flex-grow: 1;
+            height: 25px;
+            border-radius: 12.5px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .gradient-button {
+            padding: 12px 30px;
+            font-size: 1.1em;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .gradient-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .gradient-button:active {
+            transform: translateY(-1px);
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+        }
+
+        .loading-spinner .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4ECDC4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-spinner .loading-text {
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen smooth-scroll">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-16 text-center">创业路演模拟器</h1>
+        
+        <!-- 文件上传区域居中显示 -->
+        <div class="flex flex-col items-center justify-center min-h-[300px] mb-8">
+            <input type="file" id="fileInput" class="hidden" accept=".pdf,.ppt,.pptx" onchange="handleFileSelect()">
+            <label for="fileInput" class="gradient-button inline-block cursor-pointer text-lg mb-4">
+                选择文件
+            </label>
+            <p class="text-gray-600 mb-4">支持 PDF、PPT、PPTX 格式</p>
+            
+            <!-- 文件信息和开始分析按钮（初始隐藏） -->
+            <div id="fileInfo" class="hidden text-center mb-4">
+                <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+                    <i class="fas fa-file-alt text-blue-500 mr-2"></i>
+                    <span id="fileName" class="text-gray-700"></span>
+                </div>
+                <button id="startAnalysisBtn" class="gradient-button hidden" onclick="startAnalysis()">
+                    开始分析
+                </button>
+            </div>
+        </div>
+
+        <!-- 进度条容器 -->
+        <div class="progress-container hidden" id="progressContainer">
+            <div class="progress-steps">
+                <div class="progress-line">
+                    <div class="progress-line-active" id="progressLineActive"></div>
+                </div>
+                <div class="progress-step" id="step1">
+                    <div class="step-node">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="step-text">正在解析PDF文件...</div>
+                </div>
+                <div class="progress-step" id="step2">
+                    <div class="step-node">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="step-text">AI提问中...</div>
+                </div>
+                <div class="progress-step" id="step3">
+                    <div class="step-node">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="step-text">提问完成</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 问题容器 -->
+        <div id="questionsContainer" class="space-y-6 mb-8"></div>
+
+        <!-- 分析按钮容器 -->
+        <div id="analyzeButtonContainer" class="text-center mb-8 hidden">
+            <button id="analyzeButton" class="gradient-button" onclick="analyzeAnswers()">AI分析回答</button>
+            <div id="analysisLoading" class="mt-4 hidden">
+                <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+                <p class="text-gray-600 mt-2">AI分析中，请耐心等待</p>
+            </div>
+        </div>
+
+        <!-- 反馈容器 -->
+        <div id="feedbackContainer" class="space-y-6"></div>
+    </div>
+
+    <div class="loading">
+        <div class="loading-content">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white mx-auto mb-4"></div>
+            <p>正在处理，请稍候...</p>
+        </div>
+    </div>
+
+    <script>
+        const uploadForm = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const qaSection = document.getElementById('qa-section');
+        const loading = document.querySelector('.loading');
+        const currentQuestionNum = document.getElementById('current-question-num');
+        const progressBar = document.getElementById('progress-bar');
+        const progressPercentage = document.getElementById('progress-percentage');
+        const currentQuestion = document.getElementById('current-question');
+        const answerInput = document.getElementById('answer');
+        const nextQuestionBtn = document.getElementById('next-question');
+        const submitAllBtn = document.getElementById('submit-all');
+        const finalFeedback = document.getElementById('final-feedback');
+        const feedbackContent = document.getElementById('feedback-content');
+
+        let questions = [];
+        let answers = [];
+        let currentIndex = 0;
+
+        // 处理文件选择
+        function handleFileSelect() {
+            const fileInput = document.getElementById('fileInput');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const startAnalysisBtn = document.getElementById('startAnalysisBtn');
+            
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                fileName.textContent = file.name;
+                fileInfo.classList.remove('hidden');
+                startAnalysisBtn.classList.remove('hidden');
+            }
+        }
+
+        // 开始分析
+        function startAnalysis() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('请选择文件');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // 显示进度条，隐藏开始分析按钮
+            document.getElementById('progressContainer').classList.remove('hidden');
+            document.getElementById('startAnalysisBtn').classList.add('hidden');
+            showProgress(1); // 显示"正在读取PDF文件"
+
+            let source = new EventSource('/upload-status');
+            
+            source.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                switch(data.status) {
+                    case 'reading_pdf':
+                        showProgress(1); // 正在读取PDF文件
+                        break;
+                    case 'generating_questions':
+                        showProgress(2); // AI提问中
+                        break;
+                    case 'completed':
+                        showProgress(3); // 提问完成
+                        source.close();
+                        break;
+                }
+            };
+
+            source.onerror = function(error) {
+                console.error('EventSource failed:', error);
+                source.close();
+            };
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // 显示问题部分
+                const questionsContainer = document.getElementById('questionsContainer');
+                questionsContainer.innerHTML = '';
+                data.questions.forEach((question, index) => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'question-answer fade-in';
+                    questionDiv.innerHTML = `
+                        <div class="question">${index + 1}. ${question}</div>
+                        <textarea class="answer" rows="4" placeholder="请输入您的回答"></textarea>
+                    `;
+                    questionsContainer.appendChild(questionDiv);
+                });
+                
+                // 显示"开始分析"按钮
+                document.getElementById('analyzeButtonContainer').classList.remove('hidden');
+                
+                // 延迟显示问题部分的动画
+                setTimeout(() => {
+                    document.querySelectorAll('.fade-in').forEach((el, i) => {
+                        setTimeout(() => {
+                            el.classList.add('visible');
+                        }, i * 200);
+                    });
+                    
+                    // 平滑滚动到问题部分
+                    questionsContainer.scrollIntoView({ behavior: 'smooth' });
+                }, 500);
+            })
+            .catch(error => {
+                alert('错误：' + error.message);
+                // 出错时隐藏进度条，显示开始分析按钮
+                document.getElementById('progressContainer').classList.add('hidden');
+                document.getElementById('startAnalysisBtn').classList.remove('hidden');
+            });
+        }
+
+        function showQuestion(index) {
+            currentIndex = index;
+            currentQuestionNum.textContent = index + 1;
+            const progress = ((index + 1) / 5) * 100;
+            progressBar.style.width = `${progress}%`;
+            progressPercentage.textContent = `${progress}%`;
+            
+            currentQuestion.textContent = questions[index];
+            answerInput.value = answers[index];
+            
+            if (index === questions.length - 1) {
+                nextQuestionBtn.classList.add('hidden');
+                submitAllBtn.classList.remove('hidden');
+            } else {
+                nextQuestionBtn.classList.remove('hidden');
+                submitAllBtn.classList.add('hidden');
+            }
+        }
+
+        nextQuestionBtn.addEventListener('click', () => {
+            answers[currentIndex] = answerInput.value;
+            
+            if (!answers[currentIndex].trim()) {
+                alert('请输入您的回答');
+                return;
+            }
+            
+            if (currentIndex < questions.length - 1) {
+                showQuestion(currentIndex + 1);
+            }
+        });
+
+        submitAllBtn.addEventListener('click', async () => {
+            answers[currentIndex] = answerInput.value;
+            
+            if (!answers[currentIndex].trim()) {
+                alert('请输入您的回答');
+                return;
+            }
+            
+            loading.style.display = 'block';
+            
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        questions: questions,
+                        answers: answers
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                
+                feedbackContent.innerHTML = data.feedback;
+                finalFeedback.classList.remove('hidden');
+                finalFeedback.scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                alert('提交答案时发生错误');
+                console.error(error);
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+
+        const dropZone = document.querySelector('.border-dashed');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropZone.classList.add('border-blue-500');
+        }
+
+        function unhighlight(e) {
+            dropZone.classList.remove('border-blue-500');
+        }
+
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+
+            fileInput.files = files;
+            const file = files[0];
+            if (file) {
+                fileInfo.textContent = `已选择文件: ${file.name}`;
+                fileInfo.classList.remove('hidden');
+            }
+        }
+
+        function showProgress(step) {
+            const progressContainer = document.getElementById('progressContainer');
+            const progressLineActive = document.getElementById('progressLineActive');
+            progressContainer.style.display = 'block';
+            
+            // 重置所有步骤
+            document.querySelectorAll('.progress-step .step-node').forEach(node => {
+                node.classList.remove('active', 'completed');
+            });
+            
+            // 设置进度线宽度
+            const progressWidth = ((step - 1) / 2) * 100;
+            progressLineActive.style.width = `${progressWidth}%`;
+            
+            // 激活当前步骤和完成之前的步骤
+            for (let i = 1; i <= 3; i++) {
+                const stepNode = document.querySelector(`#step${i} .step-node`);
+                if (i < step) {
+                    stepNode.classList.add('completed');
+                } else if (i === step) {
+                    stepNode.classList.add('active');
+                }
+            }
+        }
+
+        function analyzeAnswers() {
+            const questions = [];
+            const answers = [];
+            document.querySelectorAll('.question-answer').forEach(qa => {
+                questions.push(qa.querySelector('.question').textContent.substring(3));
+                answers.push(qa.querySelector('.answer').value);
+            });
+
+            // 显示加载状态，隐藏分析按钮
+            document.getElementById('analyzeButton').disabled = true;
+            document.getElementById('analyzeButton').classList.add('opacity-50');
+            document.getElementById('analysisLoading').classList.remove('hidden');
+
+            fetch('/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ questions, answers })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // 恢复按钮状态
+                document.getElementById('analyzeButton').disabled = false;
+                document.getElementById('analyzeButton').classList.remove('opacity-50');
+                document.getElementById('analysisLoading').classList.add('hidden');
+
+                console.log('收到的反馈数据:', data.feedback);
+
+                // 提取总分
+                const scoreMatch = data.feedback.match(/总体评分[：:]\s*(\d+)/);
+                const totalScore = scoreMatch ? parseInt(scoreMatch[1]) : 0;
+                
+                let feedbackHtml = `
+                    <div class="feedback-section fade-in">
+                        <h3>总体评分</h3>
+                        <div class="score-container">
+                            <div class="score-text">${totalScore} 分</div>
+                            <div class="score-bar ${getScoreClass(totalScore)}" 
+                                 style="width: ${totalScore}%"></div>
+                        </div>
+                    </div>
+                `;
+
+                // 添加分析总结部分
+                feedbackHtml += `
+                    <div class="feedback-section fade-in">
+                        <h3>AI分析总结</h3>
+                        <div class="p-6 bg-white rounded-lg shadow-sm">
+                            <div class="space-y-6">
+                `;
+
+                // 处理每个分析部分
+                const analysisPoints = [
+                    '回答的完整性和逻辑性',
+                    '对关键问题的理解深度',
+                    '商业模式的可行性论证',
+                    '市场认知和竞争分析',
+                    '团队能力展示',
+                    '财务规划的合理性'
+                ];
+
+                const scores = {
+                    '回答的完整性和逻辑性': '25分',
+                    '对关键问题的理解深度': '20分',
+                    '商业模式的可行性论证': '15分',
+                    '市场认知和竞争分析': '15分',
+                    '团队能力展示': '15分',
+                    '财务规划的合理性': '10分'
+                };
+
+                // 将反馈文本按数字编号分割
+                const sections = data.feedback.split(/(?=\d+\.)/);
+                
+                // 处理每个分析维度
+                analysisPoints.forEach((point, index) => {
+                    // 查找对应的分析内容
+                    const section = sections.find(s => s.includes(point)) || '';
+                    let content = section.replace(/^\d+\.\s*[^：:]+[：:]/, '').trim();
+                    
+                    // 特殊处理财务规划的合理性部分，避免包含改进建议
+                    if (point === '财务规划的合理性') {
+                        // 如果内容中包含"改进建议"，则截取到改进建议之前的内容
+                        const improvementIndex = content.indexOf('改进建议');
+                        if (improvementIndex > -1) {
+                            content = content.substring(0, improvementIndex).trim();
+                        }
+                    }
+                    
+                    feedbackHtml += `
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <div class="flex justify-between items-center mb-3">
+                                <div class="font-medium text-gray-800">${point}</div>
+                                <div class="text-sm text-gray-500"></div>
+                            </div>
+                            <div class="text-gray-700 leading-relaxed">
+                                ${content || '暂无分析'}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                feedbackHtml += `
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // 显示反馈
+                const feedbackContainer = document.getElementById('feedbackContainer');
+                feedbackContainer.innerHTML = feedbackHtml;
+
+                // 动画显示反馈
+                setTimeout(() => {
+                    document.querySelectorAll('#feedbackContainer .fade-in').forEach((el, i) => {
+                        setTimeout(() => {
+                            el.classList.add('visible');
+                        }, i * 200);
+                    });
+                    
+                    // 平滑滚动到反馈部分
+                    feedbackContainer.scrollIntoView({ behavior: 'smooth' });
+                }, 500);
+            })
+            .catch(error => {
+                alert('错误：' + error.message);
+            });
+        }
+
+        function getScoreClass(score) {
+            if (score < 60) return 'score-red';
+            if (score < 70) return 'score-yellow';
+            if (score < 80) return 'score-blue';
+            return 'score-green';
+        }
+
+        function getScoreColorClass(score) {
+            if (score < 60) return 'text-red-600';
+            if (score < 70) return 'text-yellow-600';
+            if (score < 80) return 'text-blue-600';
+            return 'text-green-600';
+        }
+
+        function extractSection(html, sectionTitle) {
+            const sections = html.split(/(?=\d+\.)/);
+            for (let section of sections) {
+                if (section.includes(sectionTitle)) {
+                    const content = section.split(/[：:]/)[1];
+                    return content ? content.trim() : '暂无数据';
+                }
+            }
+            return '暂无数据';
+        }
+    </script>
+</body>
+</html> 

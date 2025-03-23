@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创业项目模拟答辩平台</title>
+    <link rel="stylesheet" href="public/style.css">
+</head>
+<body>
+    <header>
+        <h1>创业项目模拟答辩平台</h1>
+        <p>上传您的创业项目路演PPT，AI将模拟投资人提问</p>
+    </header>
+
+    <main>
+        <section id="upload-section">
+            <div class="upload-container">
+                <h2>上传路演PPT</h2>
+                <p class="instruction-text">请上传您的创业项目路演PPT或PDF文件，DeepSeek模型将分析内容并生成投资人可能会提出的问题。</p>
+                <form id="upload-form">
+                    <div class="file-drop-area">
+                        <span class="file-message">拖放文件到这里或点击上传</span>
+                        <input type="file" id="ppt-file" name="pptFile" accept=".ppt,.pptx,.pdf" class="file-input">
+                    </div>
+                    <div id="file-name" class="file-name"></div>
+                    <button type="button" id="upload-btn" disabled>开始模拟答辩</button>
+                    <div id="upload-status" class="status-message hidden">
+                        <div class="loader"></div>
+                        <span>正在分析文件并生成问题，请稍候...</span>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section id="qa-section" class="hidden">
+            <div class="qa-container">
+                <h2>模拟答辩环节</h2>
+                <div id="presentation-preview">
+                    <h3>PPT内容摘要</h3>
+                    <div id="ppt-summary"></div>
+                </div>
+                <div id="qa-area">
+                    <h3>投资人提问</h3>
+                    <div id="questions-list"></div>
+                    <div class="input-area">
+                        <input type="text" id="answer-input" placeholder="输入您的回答...">
+                        <button id="submit-answer">提交回答</button>
+                    </div>
+                    <div id="answer-status" class="status-message hidden">
+                        <div class="loader"></div>
+                        <span>正在评估您的回答，请稍候...</span>
+                    </div>
+                </div>
+                <div id="feedback-area" class="hidden">
+                    <h3>答辩反馈</h3>
+                    <div id="feedback-content"></div>
+                </div>
+                <div class="button-group">
+                    <button id="new-question" class="secondary-btn">生成新问题</button>
+                    <div id="question-status" class="status-message hidden">
+                        <div class="loader"></div>
+                        <span>正在生成新问题，请稍候...</span>
+                    </div>
+                    <button id="restart" class="secondary-btn">重新开始</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 创业项目模拟答辩平台 | 基于DeepSeek开源模型</p>
+        <p class="api-info">使用DeepSeek API进行内容分析和问题生成</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html> 
