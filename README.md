@@ -1,78 +1,86 @@
-# 创业项目模拟答辩平台
+# 创业路演模拟器
 
-这是一个为大学生创业团队提供创业项目模拟答辩的网页应用。该应用允许用户上传创业项目的路演PPT，然后利用DeepSeek开源模型分析PPT内容，生成如投资人或创业导师可能会提出的问题，帮助创业团队提前准备答辩。
+一个帮助创业者准备投资路演的交互式Web应用程序。用户可以上传路演材料（PPT或PDF），系统会生成投资人可能提出的问题，并对用户的回答进行专业分析和评估。
 
 ## 功能特点
 
-- **PPT/PDF上传**: 支持上传PPT、PPTX或PDF格式的路演文件
-- **内容分析**: 服务器端解析PPT/PDF内容，提取关键信息，并使用DeepSeek API进行分析
-- **智能提问**: 基于提取的内容生成投资人可能会提出的问题
-- **答辩反馈**: 对回答进行评估，提供针对性反馈和改进建议
-- **多轮问答**: 支持多轮问答，模拟真实答辩场景
+- 支持PDF和PPT/PPTX文件上传和处理
+- 自动生成投资人可能提出的关键问题（5个高质量问题）
+- 交互式问答界面，轻松记录回答
+- 专业的AI分析和评估功能，包括多维度评分和改进建议
+- 实时状态更新，提升用户体验
 
-## 安装指南
+## 技术栈
 
-### 前提条件
+- 前端：HTML/CSS/JavaScript，TailwindCSS
+- 后端：Python，Flask
+- 文件处理：pdf2image，python-pptx，PyPDF2
+- OCR识别：Tesseract
 
-- 安装 [Node.js](https://nodejs.org/) (推荐版本 14.x 或更高版本)
-- 注册并获取 [DeepSeek API](https://api-docs.deepseek.com/zh-cn/) 密钥
+## 部署说明
 
-### 安装步骤
+### 本地开发
 
-1. 克隆或下载本项目
-2. 进入项目根目录
-3. 安装依赖包:
+1. 克隆仓库
+   ```
+   git clone https://github.com/Dreamspace6096/startup-pitch-simulator.git
+   cd startup-pitch-simulator
+   ```
 
-```bash
-npm install
-```
+2. 安装依赖
+   ```
+   pip install -r requirements.txt
+   ```
 
-## 使用方法
+3. 配置外部依赖
 
-1. 启动服务器:
+   - 安装Tesseract OCR: [https://github.com/UB-Mannheim/tesseract/wiki](https://github.com/UB-Mannheim/tesseract/wiki)
+   - 安装Poppler: [https://github.com/oschwartz10612/poppler-windows/releases](https://github.com/oschwartz10612/poppler-windows/releases)
 
-```bash
-npm start
-```
+4. 配置环境变量
+   创建`.env`文件并配置DeepSeek API密钥:
+   ```
+   DEEPSEEK_API_KEY=your_api_key_here
+   DEEPSEEK_API_URL=https://api.deepseek.com/v1/chat/completions
+   ```
 
-2. 在浏览器中访问 `http://localhost:3000`
-3. 上传您的路演PPT或PDF文件
-4. 系统会分析PPT内容并显示摘要
-5. 回答系统生成的问题
-6. 查看系统提供的反馈和建议
-7. 点击"生成新问题"继续模拟答辩
-8. 完成后可点击"重新开始"上传新的PPT
+5. 运行应用
+   ```
+   python main.py
+   ```
 
-## 服务器端文件解析
+### Vercel部署
 
-本项目实现了服务器端PPT/PDF文件解析功能:
+本应用已针对Vercel部署进行了优化：
 
-1. **PDF解析**: 使用pdf-parse库提取PDF文本内容
-2. **PPTX解析**: 使用pptx-extract库解析PPTX文件内容
-3. **PPT解析**: 目前采用模拟数据，实际部署时可使用LibreOffice等工具转换为PPTX后解析
+1. 使用预定义数据：由于Vercel部署可能面临API连接问题，应用会使用预定义的高质量问题和分析反馈，确保即使没有API连接，应用也能正常运行。
 
-上传的文件会被临时存储在服务器，处理完成后自动删除，不会长期保存用户数据。
+2. Vercel配置文件：项目包含`vercel.json`和相关配置文件。
 
-## DeepSeek API 集成
+3. 部署步骤：
+   - 将代码推送到GitHub仓库
+   - 在Vercel中导入项目
+   - 设置环境变量（可选，因为应用会使用内置数据）
+   - 部署
 
-本项目已集成DeepSeek API，使用流程如下：
+## 使用说明
 
-1. PPT分析：上传PPT后，系统解析内容并调用DeepSeek API生成问题
-2. 回答评估：提交回答后，系统调用DeepSeek API分析回答质量并提供反馈
-3. 动态问题生成：当预设问题用完后，系统会基于之前的问答记录生成新问题
+1. 访问应用首页
+2. 上传您的路演PPT或PDF文件
+3. 系统会生成5个投资人可能提出的问题
+4. 为每个问题输入您的回答
+5. 点击"AI分析回答"按钮获取专业评估
+6. 查看分析结果，包括总体评分和各维度点评
 
-当前使用的API密钥：`sk-201fb97783f847a18427382308264e50`
+## 注意事项
 
-## 本地开发
+- 上传文件大小限制为50MB
+- 支持的文件格式：PDF, PPT, PPTX
+- 系统会在处理完成后删除上传的文件，保护用户隐私
 
-要进行本地开发，您可以:
+## 离线模式说明
 
-1. 启动开发模式 (自动重启服务器): 
-```bash
-npm run dev
-```
-
-2. 在浏览器中访问 `http://localhost:3000`
+当无法连接DeepSeek API时，系统会自动切换到离线模式，使用预定义的高质量问题和分析模板。这确保了应用在所有环境下都能正常运行，是专门为Vercel部署设计的解决方案。
 
 ## 项目结构
 
