@@ -145,13 +145,17 @@ def generate_questions(text):
             logger.error(f"API请求失败：{response.text}")
             return {"error": f"API请求失败：{response.text}"}
         
-        result = response.json()
-        if 'choices' in result and len(result['choices']) > 0:
-            questions = result['choices'][0]['message']['content'].strip().split('\n')
-            return {"questions": questions[:5]}
-        else:
-            logger.error(f"API响应格式错误：{result}")
-            return {"error": "API响应格式错误"}
+        try:
+            result = response.json()
+            if 'choices' in result and len(result['choices']) > 0:
+                questions = result['choices'][0]['message']['content'].strip().split('\n')
+                return {"questions": questions[:5]}
+            else:
+                logger.error(f"API响应格式错误：{result}")
+                return {"error": "API响应格式错误"}
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON解析错误: {str(e)}, 响应内容: {response.text[:200]}...")
+            return {"error": f"无法解析API响应: {str(e)}"}
             
     except requests.exceptions.ConnectTimeout:
         logger.error("连接API服务器超时")
@@ -233,12 +237,17 @@ def analyze_answers(questions, answers):
             logger.error(f"API请求失败：{response.text}")
             return {"error": f"API请求失败：{response.text}"}
             
-        result = response.json()
-        if 'choices' in result and len(result['choices']) > 0:
-            feedback = result['choices'][0]['message']['content']
-            return {"feedback": feedback}
-        else:
-            return {"error": "无法生成反馈"}
+        try:
+            result = response.json()
+            if 'choices' in result and len(result['choices']) > 0:
+                feedback = result['choices'][0]['message']['content']
+                return {"feedback": feedback}
+            else:
+                logger.error(f"API响应格式错误：{result}")
+                return {"error": "无法生成反馈，API响应格式错误"}
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON解析错误: {str(e)}, 响应内容: {response.text[:200]}...")
+            return {"error": f"无法解析API响应: {str(e)}"}
             
     except requests.exceptions.ConnectTimeout:
         logger.error("连接API服务器超时")
