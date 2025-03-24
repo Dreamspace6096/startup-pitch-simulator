@@ -25,9 +25,6 @@
             text-align: center;
             color: white;
         }
-        .smooth-scroll {
-            scroll-behavior: smooth;
-        }
         .gradient-button {
             background: linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1, #96C93D);
             background-size: 300% 300%;
@@ -336,7 +333,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen smooth-scroll">
+<body class="bg-gray-100 min-h-screen">
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-4xl font-bold mb-16 text-center">创业路演模拟器</h1>
         
@@ -695,7 +692,7 @@
                 if (data.error) {
                     throw new Error(data.error);
                 }
-
+                
                 // 恢复按钮状态
                 document.getElementById('analyzeButton').disabled = false;
                 document.getElementById('analyzeButton').classList.remove('opacity-50');
@@ -735,15 +732,6 @@
                     '团队能力展示',
                     '财务规划的合理性'
                 ];
-
-                const scores = {
-                    '回答的完整性和逻辑性': '25分',
-                    '对关键问题的理解深度': '20分',
-                    '商业模式的可行性论证': '15分',
-                    '市场认知和竞争分析': '15分',
-                    '团队能力展示': '15分',
-                    '财务规划的合理性': '10分'
-                };
 
                 // 将反馈文本按数字编号分割
                 const sections = data.feedback.split(/(?=\d+\.)/);
