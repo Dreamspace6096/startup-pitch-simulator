@@ -3,14 +3,14 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "main.py"
+      "dest": "api/main.py"
     }
   ],
   "env": {
     "PYTHONUNBUFFERED": "1"
   },
   "functions": {
-    "*.py": {
+    "api/*.py": {
       "memory": 1024,
       "maxDuration": 60
     }
